@@ -1,14 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import BirthdayHero from '@/components/BirthdayHero';
 import PhotoGallery from '@/components/PhotoGallery';
 import CelebrationBackground from '@/components/CelebrationBackground';
 import WishMessage from '@/components/WishMessage';
-
-import CongratulationsEffect from '@/components/CongratulationsEffect';
-import BirthdayMusic from '@/components/BirthdayMusic';
+import TouchToStart from '@/components/TouchToStart';
 
 export default function Home() {
   return (
@@ -22,15 +19,15 @@ export default function Home() {
           className="object-cover"
           priority
         />
-        {/* Thematic Overlays - Reduced opacity for better visibility */}
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-violet-900/10 to-indigo-900/20 mix-blend-multiply" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
 
+      {/* Touch-to-start overlay (handles music + fireworks) */}
+      <TouchToStart />
+
       {/* Content Layer */}
       <div className="relative z-10">
-        <BirthdayMusic />
-        <CongratulationsEffect />
         <CelebrationBackground />
         <BirthdayHero />
         <PhotoGallery />
