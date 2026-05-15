@@ -34,7 +34,7 @@ export default function BirthdayHero() {
 
           <div className="flex flex-col items-center gap-6">
             <p className="text-xl md:text-3xl text-purple-100 font-bold tracking-wide drop-shadow-md">
-              From your loving <span className="text-white border-b-2 border-purple-400">Sourav</span>
+              <span className="text-white border-b-2 border-purple-400">Many Many Happy Returns of the Day my love!</span>
             </p>
 
             <div className="flex gap-8 md:gap-12 py-8 px-10 bg-black/30 backdrop-blur-md rounded-2xl border border-white/10 shadow-inner">
