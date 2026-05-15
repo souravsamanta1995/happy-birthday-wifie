@@ -92,15 +92,28 @@ export default function TouchToStart({ onDismiss }: { onDismiss?: () => void }) 
     loopTimerRef.current = setTimeout(() => doLoop(ctx), (MELODY_DURATION + 2) * 1000);
   }, []);
 
-  const startMusic = useCallback(async () => {
+  // ⚠️ MUST be synchronous for iOS Safari — no async/await!
+  // AudioContext creation + .resume() must happen in the synchronous
+  // part of the user gesture handler. Once you await, iOS revokes the gesture.
+  const startMusicSync = useCallback(() => {
     if (loopActiveRef.current) return;
+    // Create AudioContext synchronously (within user gesture)
     let ctx = ctxRef.current;
-    if (!ctx || ctx.state === 'closed') { ctx = new AudioContext(); ctxRef.current = ctx; }
-    if (ctx.state === 'suspended') await ctx.resume();
-    if (ctx.state !== 'running') return;
-    loopActiveRef.current = true;
-    doLoop(ctx);
+    if (!ctx || ctx.state === 'closed') {
+      ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      ctxRef.current = ctx;
+    }
+    // Call resume() synchronously (returns Promise but the call itself unlocks iOS)
+    ctx.resume().then(() => {
+      if (ctx!.state === 'running' && !loopActiveRef.current) {
+        loopActiveRef.current = true;
+        doLoop(ctx!);
+      }
+    });
   }, [doLoop]);
+
+  // Kept for the floating button (desktop only, already unlocked)
+  const startMusic = useCallback(() => startMusicSync(), [startMusicSync]);
 
   // ── Firework storm ──────────────────────────────────────────────────────
   const launchStorm = useCallback((touchX?: number, touchY?: number) => {
@@ -134,30 +147,32 @@ export default function TouchToStart({ onDismiss }: { onDismiss?: () => void }) 
   }, []);
 
   // ── Handle touch / click on the popup ──────────────────────────────────
-  const handleTouch = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.stopPropagation();
+  // Use a ref to prevent double-fire (touchstart + click both fire on mobile)
+  const firedRef = useRef(false);
 
-    // Get touch coordinates as viewport percentages
+  const handleInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    if (firedRef.current) return;
+    firedRef.current = true;
+
+    // Get coordinates as viewport percentages
     let tx: number | undefined;
     let ty: number | undefined;
-    if ('touches' in e && e.touches.length > 0) {
-      tx = (e.touches[0].clientX / window.innerWidth) * 100;
-      ty = (e.touches[0].clientY / window.innerHeight) * 100;
+    if ('changedTouches' in e && e.changedTouches.length > 0) {
+      tx = (e.changedTouches[0].clientX / window.innerWidth) * 100;
+      ty = (e.changedTouches[0].clientY / window.innerHeight) * 100;
     } else if ('clientX' in e) {
       tx = (e.clientX / window.innerWidth) * 100;
       ty = (e.clientY / window.innerHeight) * 100;
     }
 
-    startMusic();
+    // 🔑 Start music SYNCHRONOUSLY (critical for iOS Safari AudioContext unlock)
+    startMusicSync();
     launchStorm(tx, ty);
 
-    // Fade then hide the popup
     setFading(true);
-    setTimeout(() => {
-      setDismissed(true);
-      onDismiss?.();
-    }, 1800);
-  }, [startMusic, launchStorm, onDismiss]);
+    setTimeout(() => { setDismissed(true); onDismiss?.(); }, 1800);
+  }, [startMusicSync, launchStorm, onDismiss]);
 
   // Cleanup
   useEffect(() => () => {
@@ -223,8 +238,8 @@ export default function TouchToStart({ onDismiss }: { onDismiss?: () => void }) 
       <div
         className={`fixed inset-0 z-[999] flex items-center justify-center cursor-pointer transition-opacity duration-[1800ms] ${fading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{ background: 'radial-gradient(ellipse at center, rgba(88,28,220,0.97) 0%, rgba(30,0,60,0.99) 100%)' }}
-        onClick={handleTouch}
-        onTouchStart={handleTouch}
+        onClick={handleInteraction}
+        onTouchEnd={handleInteraction}
       >
         {/* Ambient animated rings */}
         {[1,2,3].map(i => (
