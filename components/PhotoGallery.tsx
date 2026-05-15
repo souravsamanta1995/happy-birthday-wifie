@@ -45,12 +45,12 @@ const PHOTO_CATEGORIES: PhotoCategory[] = [
 // Flatten all images for sequential navigation
 const ALL_PHOTOS = PHOTO_CATEGORIES.flatMap(cat => cat.images.map(img => ({ src: img, color: cat.color, category: cat.title })));
 
-function MarqueeRow({ 
-  category, 
+function MarqueeRow({
+  category,
   onImageClick,
   reverse = false
-}: { 
-  category: PhotoCategory; 
+}: {
+  category: PhotoCategory;
   onImageClick: (src: string) => void;
   reverse?: boolean;
 }) {
@@ -76,9 +76,9 @@ function MarqueeRow({
 
       {/* Marquee Container - Using global CSS classes */}
       <div className="relative overflow-hidden py-4 pause-on-hover">
-        <div 
+        <div
           className="animate-marquee flex gap-4 md:gap-8"
-          style={{ 
+          style={{
             '--duration': `${category.images.length * 5}s`,
             animationDirection: reverse ? 'reverse' : 'normal'
           } as any}
@@ -149,13 +149,13 @@ export default function PhotoGallery() {
 
       <div className="space-y-4">
         {PHOTO_CATEGORIES.map((category, idx) => (
-          <MarqueeRow 
-            key={idx} 
-            category={category} 
+          <MarqueeRow
+            key={idx}
+            category={category}
             onImageClick={(src) => {
               const index = ALL_PHOTOS.findIndex(p => p.src === src);
               setSelectedIndex(index);
-            }} 
+            }}
             reverse={idx % 2 !== 0}
           />
         ))}
@@ -237,3 +237,5 @@ export default function PhotoGallery() {
     </section>
   );
 }
+
+
