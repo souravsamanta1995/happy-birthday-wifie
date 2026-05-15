@@ -10,14 +10,6 @@ import WishMessage from '@/components/WishMessage';
 import CongratulationsEffect from '@/components/CongratulationsEffect';
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
   return (
     <main className="relative min-h-screen overflow-hidden">
       {/* Background Image Layer */}
