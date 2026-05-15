@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-// Happy Birthday melody: [frequency Hz, duration beats]
 const NOTES: [number, number][] = [
   [392.00, 0.75], [392.00, 0.25], [440.00, 1.0], [392.00, 1.0], [523.25, 1.0], [493.88, 2.0],
   [392.00, 0.75], [392.00, 0.25], [440.00, 1.0], [392.00, 1.0], [587.33, 1.0], [523.25, 2.0],
@@ -10,15 +9,14 @@ const NOTES: [number, number][] = [
   [698.46, 0.75], [698.46, 0.25], [659.25, 1.0], [523.25, 1.0], [587.33, 1.0], [523.25, 3.0],
 ];
 
-const BEAT = 0.38; // seconds per beat
+const BEAT = 0.38;
 const MELODY_DURATION = NOTES.reduce((s, [, b]) => s + b * BEAT + 0.02, 0.1);
-const LOOP_PAUSE = 2; // seconds between loops
+const LOOP_PAUSE = 2; // seconds between repeats
 
 function scheduleMelody(ctx: AudioContext, startAt: number) {
   let t = startAt;
   NOTES.forEach(([freq, beats]) => {
     const dur = beats * BEAT;
-
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
@@ -46,121 +44,95 @@ function scheduleMelody(ctx: AudioContext, startAt: number) {
 export default function BirthdayMusic() {
   const ctxRef = useRef<AudioContext | null>(null);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startTimeRef = useRef<number>(0);
+  // Synchronous ref (not state) so we avoid React async state timing issues
+  const loopActiveRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [blockedByBrowser, setBlockedByBrowser] = useState(false);
 
   const clearLoop = useCallback(() => {
-    if (loopTimerRef.current) clearTimeout(loopTimerRef.current);
-    loopTimerRef.current = null;
+    if (loopTimerRef.current) { clearTimeout(loopTimerRef.current); loopTimerRef.current = null; }
   }, []);
 
   const stopAll = useCallback(() => {
     clearLoop();
-    if (ctxRef.current) { ctxRef.current.close(); ctxRef.current = null; }
+    loopActiveRef.current = false;
     setIsPlaying(false);
+    if (ctxRef.current) { ctxRef.current.close(); ctxRef.current = null; }
   }, [clearLoop]);
 
-  const loop = useCallback((ctx: AudioContext) => {
-    const now = ctx.currentTime;
-    scheduleMelody(ctx, now);
-    startTimeRef.current = now;
+  const doLoop = useCallback((ctx: AudioContext) => {
+    if (!loopActiveRef.current || ctxRef.current !== ctx) return;
+    scheduleMelody(ctx, ctx.currentTime);
     setIsPlaying(true);
-    // Schedule next loop
-    loopTimerRef.current = setTimeout(() => {
-      if (ctxRef.current === ctx) loop(ctx);
-    }, (MELODY_DURATION + LOOP_PAUSE) * 1000);
+    loopTimerRef.current = setTimeout(
+      () => doLoop(ctx),
+      (MELODY_DURATION + LOOP_PAUSE) * 1000
+    );
   }, []);
 
-  const beginPlaying = useCallback(() => {
-    if (ctxRef.current) return; // already playing
-    const ctx = new AudioContext();
-    ctxRef.current = ctx;
-    setBlockedByBrowser(false);
-    loop(ctx);
-  }, [loop]);
+  // Core start function — safe to call multiple times (guards via loopActiveRef)
+  const startMusic = useCallback(async () => {
+    if (loopActiveRef.current) return; // already looping, do nothing
+
+    let ctx = ctxRef.current;
+    if (!ctx || ctx.state === 'closed') {
+      ctx = new AudioContext();
+      ctxRef.current = ctx;
+    }
+    if (ctx.state === 'suspended') {
+      await ctx.resume(); // requires user gesture — will resolve if we're in one
+    }
+    if (ctx.state !== 'running') return; // browser still blocking, bail out silently
+
+    loopActiveRef.current = true;
+    doLoop(ctx);
+  }, [doLoop]);
 
   const togglePause = useCallback(() => {
-    if (isPlaying) {
+    if (loopActiveRef.current) {
       stopAll();
     } else {
-      beginPlaying();
+      startMusic();
     }
-  }, [isPlaying, stopAll, beginPlaying]);
+  }, [stopAll, startMusic]);
 
-  // 1️⃣ Try to autoplay immediately on mount
   useEffect(() => {
-    const tryAutoplay = async () => {
-      try {
-        const ctx = new AudioContext();
-        // If state is 'suspended', browser blocked autoplay
-        if (ctx.state === 'suspended') {
-          ctx.close();
-          setBlockedByBrowser(true);
-          return;
-        }
-        ctxRef.current = ctx;
-        loop(ctx);
-      } catch {
-        setBlockedByBrowser(true);
-      }
-    };
-    tryAutoplay();
-    return () => stopAll();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // 1️⃣  Try immediate autoplay on mount (works if user already interacted before)
+    startMusic();
 
-  // 2️⃣ If browser blocked autoplay, start on FIRST user interaction anywhere
-  useEffect(() => {
-    if (!blockedByBrowser) return;
-
-    const handler = () => {
-      setBlockedByBrowser(false);
-      beginPlaying();
-    };
-
-    // Use capture so we catch the interaction before anything else
-    window.addEventListener('click', handler, { once: true, capture: true });
-    window.addEventListener('touchstart', handler, { once: true, capture: true });
-    window.addEventListener('keydown', handler, { once: true, capture: true });
-    window.addEventListener('scroll', handler, { once: true, capture: true });
+    // 2️⃣  On FIRST user interaction anywhere, start music.
+    //     Using BUBBLE phase (no capture) so that e.stopPropagation() on the
+    //     music button prevents this from double-firing when the button is clicked.
+    const onFirstInteraction = () => { startMusic(); };
+    document.addEventListener('click',      onFirstInteraction, { once: true });
+    document.addEventListener('touchstart', onFirstInteraction, { once: true, passive: true });
+    document.addEventListener('keydown',    onFirstInteraction, { once: true });
+    document.addEventListener('scroll',     onFirstInteraction, { once: true, passive: true });
 
     return () => {
-      window.removeEventListener('click', handler, { capture: true });
-      window.removeEventListener('touchstart', handler, { capture: true });
-      window.removeEventListener('keydown', handler, { capture: true });
-      window.removeEventListener('scroll', handler, { capture: true });
+      document.removeEventListener('click',      onFirstInteraction);
+      document.removeEventListener('touchstart', onFirstInteraction);
+      document.removeEventListener('keydown',    onFirstInteraction);
+      document.removeEventListener('scroll',     onFirstInteraction);
+      stopAll();
     };
-  }, [blockedByBrowser, beginPlaying]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run only on mount
 
   return (
     <>
-      {/* Floating music player — fixed bottom right */}
       <div className="fixed bottom-6 right-6 z-[300] flex flex-col items-end gap-3 select-none">
-
-        {/* Browser blocked autoplay notice */}
-        {blockedByBrowser && (
-          <div
-            className="music-prompt cursor-pointer bg-white/10 backdrop-blur-xl border border-purple-300/30 rounded-2xl px-4 py-3 shadow-2xl max-w-[190px] text-center"
-            onClick={() => { setBlockedByBrowser(false); beginPlaying(); }}
-          >
-            <p className="text-white text-xs font-bold leading-relaxed">
-              🎵 Tap anywhere to play<br />Happy Birthday! 🎂
-            </p>
-          </div>
-        )}
-
-        {/* Main play/pause button */}
+        {/* Pulsing glow ring while playing */}
         <div className="relative">
           {isPlaying && (
             <>
-              <div className="absolute inset-0 rounded-full bg-purple-400/40 animate-ping" />
-              <div className="absolute -inset-2 rounded-full bg-purple-500/20 animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-purple-400/40 animate-ping pointer-events-none" />
+              <div className="absolute -inset-2 rounded-full bg-purple-500/20 animate-pulse pointer-events-none" />
             </>
           )}
+          {/* Music button — stopPropagation keeps the global listener from double-firing */}
           <button
             onClick={(e) => { e.stopPropagation(); togglePause(); }}
-            title={isPlaying ? 'Pause' : 'Play Happy Birthday'}
+            title={isPlaying ? 'Pause music' : 'Play Happy Birthday'}
             className="relative w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-600 shadow-[0_0_30px_rgba(168,85,247,0.6)] border-2 border-white/30 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_rgba(168,85,247,0.8)] active:scale-95"
           >
             {isPlaying ? (
@@ -176,18 +148,13 @@ export default function BirthdayMusic() {
           </button>
         </div>
 
-        {/* Now playing equalizer */}
+        {/* Equalizer label */}
         {isPlaying && (
           <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-3 py-1 flex items-center gap-2">
             <div className="flex items-end gap-[2px] h-4">
               {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="w-[3px] bg-purple-400 rounded-full"
-                  style={{
-                    height: `${6 + i * 3}px`,
-                    animation: `eq-bar ${0.4 + i * 0.15}s ease-in-out infinite alternate`,
-                  }}
+                <div key={i} className="w-[3px] bg-purple-400 rounded-full"
+                  style={{ height: `${6 + i * 3}px`, animation: `eq-bar ${0.4 + i * 0.15}s ease-in-out infinite alternate` }}
                 />
               ))}
             </div>
@@ -200,13 +167,6 @@ export default function BirthdayMusic() {
         @keyframes eq-bar {
           from { transform: scaleY(0.25); }
           to   { transform: scaleY(1); }
-        }
-        .music-prompt {
-          animation: slide-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        @keyframes slide-up {
-          from { opacity: 0; transform: translateY(16px) scale(0.9); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
     </>
