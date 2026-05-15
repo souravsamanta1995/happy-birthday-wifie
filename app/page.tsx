@@ -8,6 +8,7 @@ import CelebrationBackground from '@/components/CelebrationBackground';
 import WishMessage from '@/components/WishMessage';
 
 import CongratulationsEffect from '@/components/CongratulationsEffect';
+import BirthdayMusic from '@/components/BirthdayMusic';
 
 export default function Home() {
   return (
@@ -28,6 +29,7 @@ export default function Home() {
 
       {/* Content Layer */}
       <div className="relative z-10">
+        <BirthdayMusic />
         <CongratulationsEffect />
         <CelebrationBackground />
         <BirthdayHero />
