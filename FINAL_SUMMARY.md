@@ -38,9 +38,9 @@ All fully expandable with beautiful animations:
 - old_her1.jpg, old_her2.jpeg, old_her3.jpeg
 - Cherished throwback memories
 
-#### Gallery 3: "Us Together" (6 photos)
+#### Gallery 3: "Us Together" (5 photos)
 
-- together1.jpg through together6.jpg
+- together1.jpg through together5.jpg
 - Celebrate your bond and moments
 
 #### Gallery 4: "Our Journey" (3 photos)
@@ -191,7 +191,6 @@ All fully expandable with beautiful animations:
 ├── together3.jpg
 ├── together4.jpg
 ├── together5.jpg
-├── together6.jpg
 ├── old_together1.jpg
 ├── old_together2.jpg
 └── old_together3.jpg

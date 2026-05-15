@@ -11,7 +11,9 @@ All your photos should be placed in the **`public/images/`** folder. The website
 ### Photo Categories & File Names
 
 #### 1. **Only Her Image** (15 photos)
+
 Place these files in `public/images/`:
+
 - `image1.jpg`
 - `image2.jpg`
 - `image4.jpg`
@@ -29,19 +31,21 @@ Place these files in `public/images/`:
 - `image16.jpg`
 
 #### 2. **Memories Over Time** (3 photos)
+
 - `old_her1.jpg`
 - `old_her2.jpeg`
 - `old_her3.jpeg`
 
 #### 3. **Us Together** (6 photos)
+
 - `together1.jpg`
 - `together2.jpg`
 - `together3.jpg`
 - `together4.jpg`
 - `together5.jpg`
-- `together6.jpg`
 
 #### 4. **Our Journey** (3 photos)
+
 - `old_together1.jpg`
 - `old_together2.jpg`
 - `old_together3.jpg`
@@ -51,22 +55,26 @@ Place these files in `public/images/`:
 ## 🚀 Features
 
 ### ✨ Beautiful Animations
+
 - **Blob animations** - Smooth background element movements
 - **Floating particles** - Celebratory emoji falling effect (🎉, 💕, 🌹, ✨, etc.)
 - **Fade-in effects** - Smooth entrance animations
 - **Interactive galleries** - Hover to expand, click to view full-size
 
 ### 📱 Fully Responsive
+
 - Optimized for mobile, tablet, and desktop
 - Portrait images display beautifully on all screen sizes
 
 ### 💌 Heartfelt Content
+
 - Personalized hero section welcoming Barnali
 - Birthday info (DOB: May 16, 2000, Age: 24)
 - Romantic message from Sourav
 - Special wishes section
 
 ### 🎨 Color Scheme
+
 - Rose and pink gradients for romantic feel
 - Warm, celebratory colors throughout
 - Smooth transitions and hover effects
@@ -86,7 +94,8 @@ public/
 ## 🎯 Quick Start
 
 1. **Download/Download ZIP** the project from v0
-2. **Install dependencies**: 
+2. **Install dependencies**:
+
    ```bash
    npm install
    # or
@@ -98,6 +107,7 @@ public/
 3. **Add your photos** to `public/images/` folder with the exact file names above
 
 4. **Run the development server**:
+
    ```bash
    npm run dev
    # or
@@ -124,6 +134,7 @@ If you want to modify the website:
 ## 🚀 Deployment
 
 Deploy to Vercel with one click:
+
 1. Push to GitHub
 2. Connect to Vercel
 3. Deploy with zero configuration

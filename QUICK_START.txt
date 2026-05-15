@@ -27,7 +27,7 @@ Photo files needed (EXACT FILENAMES - case sensitive):
 
   💕 US TOGETHER (6 photos):
      together1.jpg, together2.jpg, together3.jpg, together4.jpg,
-     together5.jpg, together6.jpg
+     together5.jpg
 
   💑 OUR JOURNEY (3 photos):
      old_together1.jpg, old_together2.jpg, old_together3.jpg

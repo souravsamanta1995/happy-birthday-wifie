@@ -17,28 +17,33 @@ From: **Sourav** 💕
 ## 🎨 Features
 
 ✨ **Animated Hero Section**
+
 - Personalized birthday greeting
 - Floating blob animations
 - Birthday info display
 - Bouncing celebration emoji
 
 🎉 **Celebration Effects**
+
 - 40 falling emoji particles
 - Continuous animation loop
 - Festive atmosphere
 
 📸 **Four Photo Galleries** (28 photos total)
+
 - "Just Her Beauty" (15 photos)
 - "Memories Over Time" (3 photos)
 - "Us Together" (6 photos)
 - "Our Journey" (3 photos)
 
 💌 **Personal Love Message**
+
 - Heartfelt birthday message
 - 6 birthday wishes
 - Animated wish cards
 
 🎨 **Beautiful Design**
+
 - Rose & pink celebration theme
 - Smooth animations & transitions
 - Fully mobile responsive
@@ -51,6 +56,7 @@ From: **Sourav** 💕
 ### File Names (EXACT - case sensitive)
 
 **Category 1: Just Her Beauty (15 photos)**
+
 ```
 image1.jpg, image2.jpg, image4.jpg, image5.jpg, image6.jpg,
 image7.jpg, image8.jpg, image9.jpg, image10.jpg, image11.jpg,
@@ -58,22 +64,26 @@ image12.jpg, image13.jpg, image14.jpg, image15.jpg, image16.jpg
 ```
 
 **Category 2: Memories Over Time (3 photos)**
+
 ```
 old_her1.jpg, old_her2.jpeg, old_her3.jpeg
 ```
 
 **Category 3: Us Together (6 photos)**
+
 ```
 together1.jpg, together2.jpg, together3.jpg,
-together4.jpg, together5.jpg, together6.jpg
+together4.jpg, together5.jpg
 ```
 
 **Category 4: Our Journey (3 photos)**
+
 ```
 old_together1.jpg, old_together2.jpg, old_together3.jpg
 ```
 
 ### File Location
+
 All photos go in: **`/public/images/`**
 
 ---
@@ -81,10 +91,12 @@ All photos go in: **`/public/images/`**
 ## 📱 Viewing Options
 
 ### 1. Preview in v0 (Easiest)
+
 - Click preview button
 - Live updates as you add photos
 
 ### 2. Run Locally
+
 ```bash
 npm install
 npm run dev
@@ -92,6 +104,7 @@ npm run dev
 ```
 
 ### 3. Deploy to Vercel (Recommended)
+
 ```bash
 npm run build
 # Then deploy or use vercel CLI
@@ -104,6 +117,7 @@ npm run build
 Start with: **`INSTRUCTIONS.md`** (Complete Guide)
 
 Other helpful files:
+
 - `QUICK_START.txt` - Quick reference guide
 - `BIRTHDAY_SETUP.md` - Setup and customization
 - `FILE_STRUCTURE.md` - Project organization
@@ -169,18 +183,24 @@ app/
 ## 🎨 Customization
 
 ### Change Message
+
 Edit `components/WishMessage.tsx`:
+
 - Update birthday message
 - Modify wishes array
 - Change names/dates
 
 ### Change Colors
+
 Edit component files:
+
 - Swap Tailwind color classes
 - Examples: `rose-100` → `blue-100`
 
 ### Change Emojis
+
 Edit `components/CelebrationBackground.tsx`:
+
 - Update emoji array
 - Add different celebration emojis
 
@@ -217,6 +237,7 @@ Easiest hosting option:
 3. Site goes live instantly
 
 **Benefits:**
+
 - Free hosting
 - Automatic SSL
 - Global CDN
@@ -238,6 +259,7 @@ Easiest hosting option:
 ## 🎊 You're All Set!
 
 Everything is built and ready. Your website is:
+
 - ✅ Beautifully designed
 - ✅ Fully animated
 - ✅ Mobile responsive
@@ -254,4 +276,4 @@ May 16, 2026
 
 ---
 
-*Start with: **INSTRUCTIONS.md** for complete setup guide*
+_Start with: **INSTRUCTIONS.md** for complete setup guide_
